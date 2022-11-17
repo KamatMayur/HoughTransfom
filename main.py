@@ -6,6 +6,7 @@ import sys
 import numpy as np
 import PySimpleGUI as sg
 from PIL import Image, ImageOps
+import HoughTransform as ht
 
 
 
@@ -56,6 +57,8 @@ layout = [
 ]
 window = sg.Window('Image Browser', layout)
 
+Edges = ht.cannyEdgeDetector(NewImage)
+Lines = ht.Hough(NewImage)
 while True:
     
 
@@ -72,6 +75,10 @@ while True:
             #image.thumbnail((500,500))
             image = ImageOps.grayscale(image)
             NewImage = np.asarray(image)
+            Edges.imgs = NewImage
+            image = Image.fromarray(Edges.detect())
+            final = Lines.Acc
+
            
             bio = io.BytesIO()
             # Actually store the image in memory in binary 
