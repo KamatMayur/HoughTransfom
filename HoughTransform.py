@@ -8,7 +8,7 @@ PI = 180
 fig, ax = plt.subplots()
 
 class cannyEdgeDetector:
-    def __init__(self, imgs, sigma=1, kernel_size=3, weak_pixel=75, strong_pixel=255, lowthreshold=15, highthreshold=40):
+    def __init__(self, imgs, sigma=1, kernel_size=1, weak_pixel=75, strong_pixel=255, lowthreshold=30, highthreshold=40):
         self.imgs = imgs
         self.imgs_final = []
         self.img_smoothed = None
@@ -123,7 +123,7 @@ class Hough:
     def __init__(self, img):
         self.img = img
         self.diag = int((img.shape[0]**2 + img.shape[1]**2)**0.5)
-        self.thetas = np.arange(-90, 90, 3)
+        self.thetas = np.arange(0, 180, 1)
         self.rhos = np.arange(-self.diag, self.diag+1, 1)
         self.temprhos = np.empty(self.thetas.size)
         self.accumalator = np.zeros((self.rhos.size, self.thetas.size), dtype=np.uint8)
@@ -139,37 +139,32 @@ class Hough:
                 rho = int((x * np.cos(self.thetas[j]) + y * np.sin(self.thetas[j])) + self.diag)
                 self.accumalator[rho, j] += 1
 
-            
+    def drawLines(self, IMG, threshold = None):
+        if threshold == None:
+            threshold = (55/100) * self.accumalator.max()
 
+        for r in range(self.accumalator.shape[0]):
+            for t in range(self.accumalator.shape[1]):
+                if self.accumalator[r][t] > threshold:
+                    rho = self.rhos[r]
+                    theta = self.thetas[t]
+                    a = np.cos(theta)
+                    b = np.sin(theta)
+                    x0 = a * rho
+                    y0 = b * rho
+                    x1 = int(x0 + 1000 * (-b))
+                    y1 = int(y0 + 1000 * (a))
+                    x2 = int(x0 - 1000 * (-b))
+                    y2 = int(y0 - 1000 * (a))
 
-IMG = Image.open('download (1).jpg')
-img = ImageOps.grayscale(IMG)
-img = np.asarray(img)
+                    draw = ImageDraw.Draw(IMG)
+                    draw.line(((x1,y1), (x2,y2)), fill="red", width=1)
+        return IMG
+# img = Image.open('vertical line.jpg')
 
-hough = cannyEdgeDetector(img)
-img = hough.detect()
-img1 = Image.fromarray(img)
-lines = Hough(img)
-lines.accumalate()
-
-print(lines.accumalator.max())
-
-for r in range(lines.accumalator.shape[0]):
-    for t in range(lines.accumalator.shape[1]):
-        if lines.accumalator[r][t] > 180:
-            rho = lines.rhos[r]
-            theta = lines.thetas[t]
-            a = np.cos(theta)
-            b = np.sin(theta) 
-            x0 = (a * rho) 
-            y0 = (b * rho) 
-            x1 = int(x0 + 1000 * (-b))
-            y1 = int(y0 + 1000 * (a))
-            x2 = int(x0 - 1000 * (-b))
-            y2 = int(y0 - 1000 * (a))
-
-            draw = ImageDraw.Draw(IMG)
-            draw.line(((x0,y0), (x1,y1)), fill="red", width=1)
-
-IMG.show()
-#plt.show()
+# img = ImageOps.grayscale(img)
+# img = np.asarray(img)
+# temp = cannyEdgeDetector(img)
+# img = temp.detect()
+# img  = Image.fromarray(img)
+# img.show()

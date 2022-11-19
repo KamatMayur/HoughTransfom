@@ -57,8 +57,6 @@ layout = [
 ]
 window = sg.Window('Image Browser', layout)
 
-Edges = ht.cannyEdgeDetector(NewImage)
-Lines = ht.Hough(NewImage)
 while True:
     
 
@@ -71,14 +69,16 @@ while True:
         filename = values["-FILE-"]
         if os.path.exists(filename):
             
-            image = Image.open(values["-FILE-"])
+            IMG = Image.open(values["-FILE-"])
             #image.thumbnail((500,500))
-            image = ImageOps.grayscale(image)
-            NewImage = np.asarray(image)
-            Edges.imgs = NewImage
-            image = Image.fromarray(Edges.detect())
-            final = Lines.Acc
-
+            img = ImageOps.grayscale(IMG)
+            
+            Edges = ht.cannyEdgeDetector(img)
+            img = Edges.detect()
+            img1 = Image.fromarray(img)
+            lines = ht.Hough(img)
+            lines.accumalate()
+            image = lines.drawLines(IMG)
            
             bio = io.BytesIO()
             # Actually store the image in memory in binary 
